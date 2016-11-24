@@ -3,6 +3,7 @@
 This is a simple hand made device for storing your passwords.
 Essentially, it emulates USB keyboard and should work with any device where USB keyboard may be connected.
 It sends user-defined sequences of keypresses as if they were entered from keyboard.
+<<<<<<< HEAD
 To simplify password management in token Windows program PwKeeperPC.exe is included into the package.
 Also, serial console added to device. It allows config device from *nix systems.
 
@@ -30,6 +31,9 @@ Changes history:
 v1.4 - 24.11.2016
 	- *nix-like TTY console added to PwKeeper
 	- Commands description added to rtf.
+=======
+To simplify password management in token Windows program PwKeeperPC.exe is included into package.
+>>>>>>> origin/master
 
 v1.3 - 16.11.2016
 	- Several bugfixes in PwKeeperPC.exe
