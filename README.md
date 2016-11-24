@@ -21,8 +21,7 @@ How to write HEX to board:
 7) Connect RST pin to GND. Start CMD and remove RST to GND connection.
    Download to board should pass.
 
-Essentialy, COM port that you see when board is in idle state - it is HID port. 
-It is not the LOADER port. Board LOADER COM appears only on short period after reset.
+Essentialy, COM port that you see when board is in idle state - it is HID port. It is not the LOADER port. Board LOADER COM appears only on short period after reset.
 -------------------------------------------------------------------   
 
 Changes history:
