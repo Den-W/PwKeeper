@@ -1,4 +1,4 @@
-*****************   PasswordKeeper v1.04   ***********************
+*****************   PasswordKeeper v1.05   ***********************
 
 This is a simple hand made device for storing your passwords.
 Essentially, it emulates USB keyboard and should work with any device where USB keyboard may be connected.
