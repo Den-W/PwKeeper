@@ -26,6 +26,9 @@ Essentialy, COM port that you see when board is in idle state - it is HID port. 
 
 Changes history:
 
+v1.5 - 13.02.2018
+        - Bugfix in login transmit procedure.
+
 v1.4 - 24.11.2016
 	- *nix-like TTY console added to PwKeeper
 	- Commands description added to rtf.

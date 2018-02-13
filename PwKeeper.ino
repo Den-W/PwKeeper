@@ -22,6 +22,8 @@
 #define  MAX_BUFFER       128     // Max IO size
 #define  MAX_EDIT         64      // EditStr size. <= MAX_BUFFER
 
+#define  VERSION       	  "1.5"   // Version string
+
 typedef unsigned long DWORD;
 
 /*
@@ -50,8 +52,8 @@ class CGlobalData
     typedef   void (*pFUNC)( void );    
     
     byte    _St;
-    char      mPassword[MAX_PASSWORD];// 0x20:Up, 0x10:Double, 0x0F:ClickN
-    char      mData[MAX_DATA];  // EEProm data. 00:Nothing, 01:ShowName, 02:SendName, 03:SendPassw, 04:SendCite
+    byte      mPassword[MAX_PASSWORD];// 0x20:Up, 0x10:Double, 0x0F:ClickN
+    byte      mData[MAX_DATA];  // EEProm data. 00:Nothing, 01:ShowName, 02:SendName, 03:SendPassw, 04:SendCite
     byte    _Wr;                // Data between _St and _Wr stored in flash memory. _Wr == crc8 of block
         
     byte      mChanged;         // mData changed    
@@ -285,7 +287,7 @@ void CGlobalData::fDispPassword(void)
 
   u8g.drawStr( 20, 13, F("Password?") );
   u8g.setFont(u8g_font_6x12r);
-  u8g.drawStr( 110, 7, F("1.4") ); 
+  u8g.drawStr( 110, 7, F(VERSION) ); 
     
   for( i=0; i<MAX_PASSWORD; i++ )
   { n = gD.mEditStr[i];        
@@ -796,7 +798,7 @@ void  CGlobalData::DrawUsb( const char *Pfx )
   else sprintf( Tb, "%s: %d/%d", Pfx, mUsbRx, mUsbTx );
   u8g.drawStr( 1, 19, Tb );
   u8g.setFont(u8g_font_6x12r);
-  DrawLabels( F("1.4"), F("Stop") );
+  DrawLabels( F(VERSION), F("Stop") );
   //sprintf( Tb, "Ph: %d/%02X", gD.mRecNo, gD.mEditStr[0] );
   //u8g.drawStr( 1, 30, Tb );
 }
@@ -909,7 +911,7 @@ void CGlobalData::fTty(void)
           { c = gD.mData[n];
             if( c != i && c > 0x01 ) continue;
             if( c == i )
-            { for( j=n+1; j<MAX_DATA && (gD.mData[j]&0xFF)>0x09; j++ );
+            { for( j=n+1; j<MAX_DATA && gD.mData[j]>0x09; j++ );
               strcpy( gD.mData+n, gD.mData+j );
             }
             gD.mChanged = 1;
@@ -1089,7 +1091,7 @@ void  CGlobalData::SetEditStr( void )
   }
   
   n = i + 1;
-  for( c = 0; n<sizeof(mData) && c<MAX_EDIT-1 && (mData[n]&0xFF)>=' '; n++,c++ ) 
+  for( c = 0; n<sizeof(mData) && c<MAX_EDIT-1 && mData[n]>=' '; n++,c++ ) 
     mEditStr[c] = mData[n];  
 }
 
@@ -1124,7 +1126,14 @@ const byte mapCtrl[] = {  0x00,           //\@ - Release all
                           0               //\z, \Z - Delay
                     };
 
-const byte TxOrder[] = { 0x04, 0x05, 0x02, 0x06, 0x03, 0x07, 0x08, 0x09 }; // V1,V2,Name,V3,Pass,V4,V5,V6
+/* Record format: <Tag(1)><Text(?)>[<Tag(1)><Text(?)>...]
+   Tag: 1:DispName,2:Login,3:Pass,4:V1,5:V2,6:V3,7:V4,8:V5,9:V6
+   Dispname always exists. All other tags - not necessary.
+   Text encoding - Win1251
+*/
+
+// Send order: V1,V2,Name,V3,Pass,V4,V5,V6
+const byte TxOrder[] = { 0x04, 0x05, 0x02, 0x06, 0x03, 0x07, 0x08, 0x09 }; 
   
 void  CGlobalData::KbdSend( void )
 { int   i, n, mode, kbpress, t, ti, e, s = mRecOffset;
@@ -1133,10 +1142,13 @@ void  CGlobalData::KbdSend( void )
   TXLED1;
   digitalWrite(RXLED, LOW);
   Keyboard.begin();
-  if( mData[s] == 0x01 )
-    for( s++; s<sizeof(mData) && (mData[s]&0xFF) >= 0x08; s++ ); // Skip Name
 
-  for( e=s; e<sizeof(mData) && (mData[e]&0xFF) >= 0x01; e++ );  // Skip till EOR
+  // Skip Name
+  if( mData[s] == 0x01 )
+    for( s++; s<sizeof(mData) && mData[s] > 0x09; s++ );
+
+  // Find EOR    
+  for( e=s; e<sizeof(mData) && mData[e] > 0x01; e++ );  // Skip till EOR
 
   for( ti=0; ti<sizeof(TxOrder); ti++ )
   { mode = 0;
@@ -1145,7 +1157,7 @@ void  CGlobalData::KbdSend( void )
     for( i = s; i<e; i++ )
       if( t == mData[i] ) break; // Tag found
 
-    if( i >= e ) continue; // Not this tag
+    if( i >= e ) continue; // Tag not found
        
     for( i++; i<e; i++ )
     { b = mData[i];
@@ -1270,22 +1282,3 @@ void CGlobalData::FlashWr(void)
   _Wr = 0;
 }
 
-
-//Эти шрифты раньше были ISO10646-1, поменял их на ISO8859-5 с русскими буквами:
-const u8g_fntpgm_uint8_t *ISO8859fonts[] =
-{
-//   u8g_font_10x20,   //крупные буквы
-   //u8g_font_4x6,     //очень мелкие буквы
-   //u8g_font_5x8,     //мелкие буквы
-   //u8g_font_6x10,    //минимально разборчивый шрифт
-   //u8g_font_6x12,    //разборчивый шрифт
-   //u8g_font_8x13B,   //толстые буквы, шрифт крупнее
-   //u8g_font_8x13,    //шрифт крупнее
-   //u8g_font_8x13O,   //шрифт крупнее, наклонный
-   //u8g_font_9x15B,   //крупный шрифт, толстый
-   //u8g_font_9x15,    //крупный шрифт
-   u8g_font_9x18B,   //самый крупный шрифт, толстый
-   //u8g_font_9x18,    //самый крупный шрифт
-   NULL
-};
- 
