@@ -1,4 +1,4 @@
-*****************   PasswordKeeper v1.04   ***********************
+*****************   PasswordKeeper v1.05   ***********************
 
 This is a simple hand made device for storing your passwords.
 Essentially, it emulates USB keyboard and should work with any device where USB keyboard may be connected.
@@ -25,6 +25,9 @@ Essentialy, COM port that you see when board is in idle state - it is HID port. 
 -------------------------------------------------------------------   
 
 Changes history:
+
+v1.5 - 13.02.2018
+        - Bugfix in login transmit procedure.
 
 v1.4 - 24.11.2016
 	- *nix-like TTY console added to PwKeeper

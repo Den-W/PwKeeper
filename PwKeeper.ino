@@ -912,7 +912,11 @@ void CGlobalData::fTty(void)
             if( c != i && c > 0x01 ) continue;
             if( c == i )
             { for( j=n+1; j<MAX_DATA && gD.mData[j]>0x09; j++ );
+<<<<<<< HEAD
               strcpy( (char*)gD.mData+n, (char*)gD.mData+j );
+=======
+              strcpy( gD.mData+n, gD.mData+j );
+>>>>>>> 61298e5777b270167c3857c7b4caaec6116bc33e
             }
             gD.mChanged = 1;
             if( gD.mPosEdit < 2 ) break;
@@ -1281,6 +1285,7 @@ void CGlobalData::FlashWr(void)
   EEPROM.write( i, _Wr );
   _Wr = 0;
 }
+<<<<<<< HEAD
 
 const u8g_fntpgm_uint8_t *ISO8859fonts[] =
 {
@@ -1298,4 +1303,6 @@ const u8g_fntpgm_uint8_t *ISO8859fonts[] =
    //u8g_font_9x18,
    NULL
 };
+=======
+>>>>>>> 61298e5777b270167c3857c7b4caaec6116bc33e
 
